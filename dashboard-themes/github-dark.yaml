@@ -1,0 +1,231 @@
+name: github-dark
+label: GitHub Dark
+description: Sober and familiar developer environment based on GitHub Dark style
+
+palette:
+  background:
+    hex: "#0d1117"
+    alpha: 1.0
+  midground:
+    hex: "#c9d1d9"
+    alpha: 1.0
+  foreground:
+    hex: "#ffffff"
+    alpha: 0.0
+  warmGlow: "rgba(56, 139, 253, 0.0)"
+  noiseOpacity: 0.0
+
+typography:
+  fontSans: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"'
+  fontMono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace'
+  fontDisplay: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif'
+  baseSize: "14px"
+  lineHeight: "1.5"
+  letterSpacing: "normal"
+
+layout:
+  radius: "6px"
+  density: comfortable
+
+layoutVariant: standard
+
+colorOverrides:
+  card: "#161b22"
+  cardForeground: "#c9d1d9"
+  popover: "#161b22"
+  popoverForeground: "#c9d1d9"
+  primary: "#238636"
+  primaryForeground: "#ffffff"
+  secondary: "#21262d"
+  secondaryForeground: "#c9d1d9"
+  muted: "#161b22"
+  mutedForeground: "#8b949e"
+  accent: "#1f6feb"
+  accentForeground: "#ffffff"
+  border: "#30363d"
+  input: "#0d1117"
+  ring: "#1f6feb"
+  success: "#2ea44f"
+  warning: "#d29922"
+  destructive: "#f85149"
+
+customCSS: |
+  /* 1. Resetear fuentes a la pila oficial de GitHub */
+  *,
+  .font-mondwest,
+  .font-display,
+  .text-display,
+  [class*="font-mondwest"],
+  [class*="text-display"] {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji" !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+  }
+
+  /* Monospace para consolas/código */
+  code, pre, .font-mono, .font-mono-ui, [class*="font-mono"] {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace !important;
+  }
+
+  /* 2. Quitar esquinas recortadas (clip-path) y forzar bordes redondeados estándar */
+  *, 
+  *:before, 
+  *:after {
+    clip-path: none !important;
+  }
+
+  /* 3. Resetear fondo general del sitio */
+  body, html, #root, div[data-layout-variant] {
+    background-color: #0d1117 !important;
+    background: #0d1117 !important;
+  }
+
+  /* Ocultar el Backdrop futurista */
+  div[style*="z-[1]"], div[style*="z-index: 1"] {
+    background-color: #0d1117 !important;
+    mix-blend-mode: normal !important;
+    opacity: 1 !important;
+  }
+  div[style*="z-[2]"], div[style*="z-index: 2"],
+  div[style*="z-[99]"], div[style*="z-index: 99"],
+  div[style*="z-[101]"], div[style*="z-index: 101"],
+  .theme-default-filler,
+  .backdrop-noise {
+    display: none !important;
+  }
+
+  /* 4. Estilos específicos de componentes al estilo GitHub */
+
+  /* Tarjetas (Cards) */
+  .border, .bg-card, [class*="bg-card"], .card-root {
+    background-color: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+  }
+
+  /* Cabecera (Header) */
+  header {
+    background-color: #161b22 !important;
+    border-bottom: 1px solid #30363d !important;
+  }
+
+  /* Barra lateral (Sidebar) */
+  #app-sidebar, aside {
+    background-color: #0d1117 !important;
+    border-right: 1px solid #30363d !important;
+  }
+
+  /* Navegación activa en la barra lateral */
+  a.active, 
+  .active-nav-item,
+  [data-chat-active="true"],
+  a[class*="active"] {
+    background-color: #21262d !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+  }
+
+  /* Quitar la barra vertical blanca/turquesa fina por defecto de Hermes y usar la naranja de GitHub */
+  a span[style*="mixBlendMode: \"plus-lighter\""],
+  a span[class*="bg-midground"] {
+    background-color: #f78166 !important; /* GitHub active Orange */
+    width: 4px !important;
+    border-radius: 2px !important;
+  }
+
+  /* Botones estilo GitHub */
+  button, 
+  .nr-button,
+  [role="button"] {
+    font-family: inherit !important;
+    font-weight: 500 !important;
+    border-radius: 6px !important;
+    padding: 5px 16px !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    transition: 80ms cubic-bezier(0.3, 0, 0.66, 0.12) !important;
+    border: 1px solid #30363d !important;
+    background-color: #21262d !important;
+    color: #c9d1d9 !important;
+    cursor: pointer !important;
+  }
+
+  button:hover,
+  .nr-button:hover {
+    background-color: #30363d !important;
+    border-color: #8b949e !important;
+    color: #ffffff !important;
+  }
+
+  /* Botón primario (Verde de GitHub para acciones principales) */
+  button.bg-primary,
+  button[class*="bg-primary"],
+  .nr-button-primary,
+  button[type="submit"] {
+    background-color: #238636 !important;
+    border: 1px solid #2ea44f !important;
+    color: #ffffff !important;
+  }
+
+  button.bg-primary:hover,
+  button[class*="bg-primary"]:hover,
+  button[type="submit"]:hover {
+    background-color: #2ea44f !important;
+    border-color: #3fb950 !important;
+  }
+
+  /* Campos de entrada (Inputs/Textareas) */
+  input, 
+  textarea,
+  select {
+    background-color: #0d1117 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 6px !important;
+    color: #c9d1d9 !important;
+    padding: 5px 12px !important;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    box-shadow: inset 0 1px 0 rgba(1, 4, 9, 0.2) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  input:focus, 
+  textarea:focus,
+  select:focus {
+    border-color: #58a6ff !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3) !important;
+  }
+
+  /* Badges (Etiquetas) */
+  [class*="badge"],
+  .badge {
+    background-color: #21262d !important;
+    border: 1px solid #30363d !important;
+    color: #8b949e !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    padding: 2px 7px !important;
+    border-radius: 2em !important;
+  }
+
+  /* Separadores */
+  hr, .border-b, .border-t, .border-r, .border-l {
+    border-color: #30363d !important;
+  }
+
+  /* Scrollbars al estilo GitHub */
+  ::-webkit-scrollbar {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0d1117 !important;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: #30363d !important;
+    border-radius: 6px !important;
+    border: 3px solid #0d1117 !important;
+  }

@@ -1,0 +1,12 @@
+{
+  "name": "terminal-plugin",
+  "label": "Terminal",
+  "icon": "Terminal",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/terminal",
+    "position": "end"
+  },
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}
