@@ -131,7 +131,7 @@ DEFAULT_AGENT_IDENTITY = (
 HERMES_AGENT_HELP_GUIDANCE = (
     "If the user asks about configuring, setting up, or using Hermes Agent "
     "itself, load the `hermes-agent` skill with skill_view(name='hermes-agent') "
-    "before answering. Docs: https://hermes-agent.nousresearch.com/docs"
+    "before answering. Docs: https://github.com/ramgeart/hermes-neo/wiki"
 )
 
 MEMORY_GUIDANCE = (
