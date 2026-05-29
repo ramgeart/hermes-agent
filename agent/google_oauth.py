@@ -56,6 +56,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
@@ -465,23 +466,93 @@ class GoogleCredentials:
 # Credential I/O (atomic + locked)
 # =============================================================================
 
-def load_credentials() -> Optional[GoogleCredentials]:
-    """Load credentials from disk. Returns None if missing or corrupt."""
-    path = _credentials_path()
+def _parse_antigravity_expiry_ms(raw: str) -> int:
+    """Parse Antigravity's RFC3339-ish token expiry to Unix milliseconds."""
+    value = str(raw or "").strip()
+    if not value:
+        return 0
+    # Python accepts at most microseconds; Antigravity/Go can emit nanoseconds.
+    if value.endswith("Z"):
+        value = value[:-1] + "+00:00"
+    if "." in value:
+        head, tail = value.split(".", 1)
+        tz_start = max(tail.find("+"), tail.find("-"))
+        if tz_start >= 0:
+            frac, tz = tail[:tz_start], tail[tz_start:]
+        else:
+            frac, tz = tail, ""
+        value = f"{head}.{frac[:6]}{tz}"
+    try:
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return int(dt.timestamp() * 1000)
+    except ValueError:
+        return 0
+
+
+def _antigravity_oauth_token_path() -> Path:
+    """Path used by Google's `agy` CLI for its OAuth token."""
+    return Path.home() / ".gemini" / "antigravity-cli" / "antigravity-oauth-token"
+
+
+def _load_antigravity_credentials() -> Optional[GoogleCredentials]:
+    """Import a valid local Antigravity (`agy`) OAuth token if Hermes has none.
+
+    The file shape is managed by Google's CLI:
+    `{ "token": { "access_token", "refresh_token", "expiry" }, ... }`.
+    We do not invent model names or endpoints here; this only lets the existing
+    Cloud Code Assist adapter reuse the user's authenticated Antigravity session.
+    """
+    path = _antigravity_oauth_token_path()
     if not path.exists():
         return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError, IOError) as exc:
+        logger.debug("Failed to read Antigravity OAuth token at %s: %s", path, exc)
+        return None
+    token = data.get("token") if isinstance(data, dict) else None
+    if not isinstance(token, dict):
+        return None
+    access_token = str(token.get("access_token") or "")
+    refresh_token = str(token.get("refresh_token") or "")
+    expires_ms = _parse_antigravity_expiry_ms(str(token.get("expiry") or ""))
+    if not access_token:
+        return None
+    creds = GoogleCredentials(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_ms=expires_ms,
+        email="",
+    )
+    # Persist into Hermes's normal profile-scoped store so future refreshes and
+    # auth status work without reading Antigravity internals on every startup.
+    try:
+        save_credentials(creds)
+        logger.info("Imported Google OAuth credentials from Antigravity token at %s", path)
+    except Exception as exc:
+        logger.debug("Could not persist imported Antigravity credentials: %s", exc)
+    return creds
+
+
+def load_credentials() -> Optional[GoogleCredentials]:
+    """Load credentials from disk, falling back to a local Antigravity token."""
+    path = _credentials_path()
+    if not path.exists():
+        return _load_antigravity_credentials()
     try:
         with _credentials_lock():
             raw = path.read_text(encoding="utf-8")
         data = json.loads(raw)
     except (json.JSONDecodeError, OSError, IOError) as exc:
         logger.warning("Failed to read Google OAuth credentials at %s: %s", path, exc)
-        return None
+        return _load_antigravity_credentials()
     if not isinstance(data, dict):
-        return None
+        return _load_antigravity_credentials()
     creds = GoogleCredentials.from_dict(data)
     if not creds.access_token:
-        return None
+        return _load_antigravity_credentials()
     return creds
 
 

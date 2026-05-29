@@ -61,7 +61,7 @@ gemini = GeminiProfile(
 
 google_gemini_cli = GeminiProfile(
     name="google-gemini-cli",
-    aliases=("gemini-cli", "gemini-oauth"),
+    aliases=("gemini-cli", "gemini-oauth", "agy", "antigravity"),
     api_mode="chat_completions",
     env_vars=(),  # OAuth — no API key
     base_url="cloudcode-pa://google",  # Cloud Code Assist internal scheme
