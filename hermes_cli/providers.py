@@ -314,6 +314,8 @@ ALIASES: Dict[str, str] = {
     # google-gemini-cli (OAuth + Code Assist)
     "gemini-cli": "google-gemini-cli",
     "gemini-oauth": "google-gemini-cli",
+    "agy": "google-gemini-cli",
+    "antigravity": "google-gemini-cli",
 
 
     # huggingface

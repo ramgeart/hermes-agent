@@ -221,9 +221,12 @@ _PROVIDER_MODELS: dict[str, list[str]] = {
         "gemini-3.1-flash-lite-preview",
     ],
     "google-gemini-cli": [
-        "gemini-3.1-pro-preview",
-        "gemini-3-pro-preview",
-        "gemini-3-flash-preview",
+        # Static fallback only. Runtime discovery for this provider reads the
+        # account-specific Antigravity/Code Assist quota buckets first.
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-3.1-flash-lite",
     ],
     "zai": [
         "glm-5.1",
@@ -1017,6 +1020,8 @@ _PROVIDER_ALIASES = {
     "qwen-portal": "qwen-oauth",
     "gemini-cli": "google-gemini-cli",
     "gemini-oauth": "google-gemini-cli",
+    "agy": "google-gemini-cli",
+    "antigravity": "google-gemini-cli",
     "hf": "huggingface",
     "hugging-face": "huggingface",
     "huggingface-hub": "huggingface",
@@ -1997,6 +2002,52 @@ def _merge_with_models_dev(provider: str, curated: list[str]) -> list[str]:
     return merged
 
 
+def _google_gemini_cli_model_ids_from_quota() -> list[str]:
+    """Fetch live Code Assist/Antigravity model IDs from quota buckets.
+
+    Google's Code Assist backend does not expose a public `/v1/models` endpoint.
+    The authoritative account-specific list we can verify is the
+    `retrieveUserQuota` response, whose buckets are keyed by `modelId`.  This
+    keeps `google-gemini-cli` aligned with the locally authenticated `agy`
+    account without hardcoding guessed model names.
+    """
+    try:
+        from hermes_cli.auth import resolve_gemini_oauth_runtime_credentials
+        from agent.google_code_assist import retrieve_user_quota
+
+        creds = resolve_gemini_oauth_runtime_credentials(force_refresh=False)
+        access_token = str(creds.get("api_key") or "").strip()
+        project_id = str(creds.get("project_id") or "").strip()
+        if not access_token:
+            return []
+        buckets = retrieve_user_quota(access_token, project_id=project_id)
+    except Exception:
+        return []
+
+    # Prefer more capable/newer-looking models first, while preserving only
+    # IDs that the API actually returned.
+    seen: set[str] = set()
+    ids: list[str] = []
+    for bucket in buckets:
+        model_id = str(getattr(bucket, "model_id", "") or "").strip()
+        if not model_id or model_id in seen:
+            continue
+        seen.add(model_id)
+        ids.append(model_id)
+
+    def sort_key(mid: str) -> tuple[tuple[int, ...], int, str]:
+        lower = mid.lower()
+        import re
+
+        version = tuple(int(part) for part in re.findall(r"\d+", lower)[:3])
+        size_rank = 0 if "pro" in lower else 1 if "flash" in lower and "lite" not in lower else 2
+        # Negative size rank keeps larger SKUs first within the same version;
+        # reverse=True below keeps newer numeric versions first.
+        return (version, -size_rank, lower)
+
+    return sorted(ids, key=sort_key, reverse=True)
+
+
 def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) -> list[str]:
     """Return the best known model catalog for a provider.
 
@@ -2027,6 +2078,10 @@ def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) 
         return get_codex_model_ids(access_token=access_token)
     if normalized == "xai-oauth":
         return list(_PROVIDER_MODELS.get("xai-oauth", _PROVIDER_MODELS.get("xai", [])))
+    if normalized == "google-gemini-cli":
+        live = _google_gemini_cli_model_ids_from_quota()
+        if live:
+            return live
     if normalized in {"copilot", "copilot-acp"}:
         try:
             live = _fetch_github_models(_resolve_copilot_catalog_api_key())
