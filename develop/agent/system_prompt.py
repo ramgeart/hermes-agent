@@ -285,50 +285,75 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
             if user_block:
                 volatile_parts.append(user_block)
 
-    # Identity block (hermes-neo): immutable identity anchor
+    # ── Temporal context engine (hermes-neo) ──────────────────────────
+    # If a TemporalContextEngine plugin is registered, use its progressive
+    # builder for identity + recent conversations + episode + semantic memory
+    # + patterns.  This replaces the manual identity_manager and
+    # conversation_index blocks below with a single, cache-aware,
+    # relevance-scored injection.  Falls back to the manual blocks if the
+    # plugin is not available or errors out.
+    _temporal_engine_used = False
     try:
-        from agent.identity_manager import get_identity_manager
-        _im = get_identity_manager()
-        _identity_block = _im.get_identity_prompt_block()
-        if _identity_block:
-            volatile_parts.append(_identity_block)
+        from hermes_cli.plugins import get_plugin_context_engine
+        _ctx_engine = get_plugin_context_engine()
+        if _ctx_engine is not None and getattr(_ctx_engine, "name", "") == "temporal":
+            # Use progressive mode — relevance-scored, budget-aware injection.
+            # user_message is not available at prompt-build time (system prompt
+            # is built once per session), so pass empty string which causes the
+            # engine to include all blocks with default relevance scores.
+            _temporal_ctx = _ctx_engine.build_progressive(user_message="")
+            if _temporal_ctx:
+                volatile_parts.append(_temporal_ctx)
+                _temporal_engine_used = True
     except Exception:
-        pass  # identity.db not configured yet or import error
+        pass  # plugin system not loaded or engine not registered
 
-    # Recent conversation topics (last 14 days) from conversation_index
-    # Gives the agent continuity across sessions by knowing what was discussed.
-    try:
-        from agent.conversation_index import get_conversation_index
-        _ci = get_conversation_index()
-        _recent = _ci.get_recent_conversations(days=14)
-        if _recent:
-            topic_lines = []
-            for conv in _recent[:15]:  # Cap at 15 to avoid prompt bloat
-                _date = conv.get("date", "")
-                _title = conv.get("title", "")
-                _topics = conv.get("topics", "")
-                _summary = conv.get("summary", "")
-                # Compact one-liner per conversation
-                _parts = []
-                if _date:
-                    _parts.append(_date)
-                if _title:
-                    _parts.append(_title)
-                if _topics:
-                    _parts.append(f"[{_topics}]")
-                if _summary and len(topic_lines) < 5:
-                    # Only add summaries for the 5 most recent
-                    _short = _summary[:120] + ("..." if len(_summary) > 120 else "")
-                    _parts.append(f"— {_short}")
-                if _parts:
-                    topic_lines.append("  - " + " | ".join(_parts))
-            if topic_lines:
-                volatile_parts.append(
-                    "═══ RECENT CONVERSATION TOPICS (last 14 days) ═══\n"
-                    + "\n".join(topic_lines)
-                )
-    except Exception:
-        pass  # memory.db not initialized yet or no data
+    # Fallback: manual identity + conversation index if temporal engine not active
+    if not _temporal_engine_used:
+        # Identity block (hermes-neo): immutable identity anchor
+        try:
+            from agent.identity_manager import get_identity_manager
+            _im = get_identity_manager()
+            _identity_block = _im.get_identity_prompt_block()
+            if _identity_block:
+                volatile_parts.append(_identity_block)
+        except Exception:
+            pass  # identity.db not configured yet or import error
+
+        # Recent conversation topics (last 14 days) from conversation_index
+        # Gives the agent continuity across sessions by knowing what was discussed.
+        try:
+            from agent.conversation_index import get_conversation_index
+            _ci = get_conversation_index()
+            _recent = _ci.get_recent_conversations(days=14)
+            if _recent:
+                topic_lines = []
+                for conv in _recent[:15]:  # Cap at 15 to avoid prompt bloat
+                    _date = conv.get("date", "")
+                    _title = conv.get("title", "")
+                    _topics = conv.get("topics", "")
+                    _summary = conv.get("summary", "")
+                    # Compact one-liner per conversation
+                    _parts = []
+                    if _date:
+                        _parts.append(_date)
+                    if _title:
+                        _parts.append(_title)
+                    if _topics:
+                        _parts.append(f"[{_topics}]")
+                    if _summary and len(topic_lines) < 5:
+                        # Only add summaries for the 5 most recent
+                        _short = _summary[:120] + ("..." if len(_summary) > 120 else "")
+                        _parts.append(f"— {_short}")
+                    if _parts:
+                        topic_lines.append("  - " + " | ".join(_parts))
+                if topic_lines:
+                    volatile_parts.append(
+                        "═══ RECENT CONVERSATION TOPICS (last 14 days) ═══\n"
+                        + "\n".join(topic_lines)
+                    )
+        except Exception:
+            pass  # memory.db not initialized yet or no data
 
     # External memory provider system prompt block (additive to built-in)
     if agent._memory_manager:
