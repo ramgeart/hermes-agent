@@ -1,0 +1,7 @@
+name: temporal
+description: >
+  Temporal context engine — produces a structured system prompt with
+  identity, 14-day conversation index, current week episode, semantic
+  memory, and detected behavioral patterns.
+version: 0.1.0
+author: hermes-neo

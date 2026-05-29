@@ -295,6 +295,41 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
     except Exception:
         pass  # identity.db not configured yet or import error
 
+    # Recent conversation topics (last 14 days) from conversation_index
+    # Gives the agent continuity across sessions by knowing what was discussed.
+    try:
+        from agent.conversation_index import get_conversation_index
+        _ci = get_conversation_index()
+        _recent = _ci.get_recent_conversations(days=14)
+        if _recent:
+            topic_lines = []
+            for conv in _recent[:15]:  # Cap at 15 to avoid prompt bloat
+                _date = conv.get("date", "")
+                _title = conv.get("title", "")
+                _topics = conv.get("topics", "")
+                _summary = conv.get("summary", "")
+                # Compact one-liner per conversation
+                _parts = []
+                if _date:
+                    _parts.append(_date)
+                if _title:
+                    _parts.append(_title)
+                if _topics:
+                    _parts.append(f"[{_topics}]")
+                if _summary and len(topic_lines) < 5:
+                    # Only add summaries for the 5 most recent
+                    _short = _summary[:120] + ("..." if len(_summary) > 120 else "")
+                    _parts.append(f"— {_short}")
+                if _parts:
+                    topic_lines.append("  - " + " | ".join(_parts))
+            if topic_lines:
+                volatile_parts.append(
+                    "═══ RECENT CONVERSATION TOPICS (last 14 days) ═══\n"
+                    + "\n".join(topic_lines)
+                )
+    except Exception:
+        pass  # memory.db not initialized yet or no data
+
     # External memory provider system prompt block (additive to built-in)
     if agent._memory_manager:
         try:

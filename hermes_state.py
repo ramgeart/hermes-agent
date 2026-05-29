@@ -33,7 +33,7 @@ T = TypeVar("T")
 
 DEFAULT_DB_PATH = get_hermes_home() / "state.db"
 
-SCHEMA_VERSION = 13
+SCHEMA_VERSION = 14
 
 # ---------------------------------------------------------------------------
 # WAL-compatibility fallback

@@ -105,6 +105,111 @@ class ZoomYear:
     months: List[ZoomMonth] = field(default_factory=list)
 
 
+@dataclass
+class MonthlySummary:
+    """A monthly summary aggregating weekly episodes."""
+
+    id: int
+    year: int
+    month: int
+    summary: str
+    highlights: List[str] = field(default_factory=list)
+    created_at: Optional[str] = None
+
+
+@dataclass
+class YearlySummary:
+    """A yearly summary aggregating monthly summaries."""
+
+    id: int
+    year: int
+    summary: str
+    highlights: List[str] = field(default_factory=list)
+    created_at: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Default synthesis helpers (deterministic, no LLM required)
+# ---------------------------------------------------------------------------
+
+def _default_monthly_synthesis(
+    episodes: List[Episode],
+) -> tuple[str, List[str]]:
+    """Build a monthly summary by combining episode narratives.
+
+    Returns (summary_text, highlights) without requiring an LLM.
+    """
+    titles = [ep.title for ep in episodes]
+    narratives = [ep.narrative for ep in episodes if ep.narrative]
+    all_topics: list[str] = []
+    all_decisions: list[str] = []
+    for ep in episodes:
+        all_topics.extend(ep.topics)
+        all_decisions.extend(ep.key_decisions)
+
+    # Build summary from episode narratives
+    summary_parts: list[str] = []
+    if titles:
+        summary_parts.append(
+            f"This month covered {len(episodes)} episode(s): "
+            + "; ".join(titles) + "."
+        )
+    for nar in narratives:
+        summary_parts.append(nar)
+
+    summary_text = "\n\n".join(summary_parts)
+
+    # Highlights: top unique topics + key decisions (up to 5)
+    seen: set[str] = set()
+    highlights: list[str] = []
+    for item in all_topics + all_decisions:
+        if item not in seen:
+            seen.add(item)
+            highlights.append(item)
+        if len(highlights) >= 5:
+            break
+
+    return summary_text, highlights
+
+
+def _default_yearly_synthesis(
+    summaries: List[MonthlySummary],
+) -> tuple[str, List[str]]:
+    """Build a yearly summary from monthly summaries.
+
+    Returns (summary_text, highlights) without requiring an LLM.
+    """
+    month_names = [
+        "", "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
+    ]
+
+    summary_parts: list[str] = [
+        f"Year in review: {summaries[0].year}. "
+        f"{len(summaries)} month(s) summarized."
+    ]
+    for ms in summaries:
+        month_label = month_names[ms.month] if ms.month <= 12 else str(ms.month)
+        summary_parts.append(f"\n--- {month_label} ---\n{ms.summary}")
+
+    summary_text = "\n".join(summary_parts)
+
+    # Aggregate highlights from all months (up to 10)
+    seen: set[str] = set()
+    highlights: list[str] = []
+    for ms in summaries:
+        for h in ms.highlights:
+            if h not in seen:
+                seen.add(h)
+                highlights.append(h)
+            if len(highlights) >= 10:
+                break
+        if len(highlights) >= 10:
+            break
+
+    return summary_text, highlights
+
+
 # ---------------------------------------------------------------------------
 # Main API
 # ---------------------------------------------------------------------------
@@ -422,6 +527,201 @@ class EpisodicMemory:
             result.append(zoom_year)
 
         return result
+
+    # -- Summary Generation -------------------------------------------------
+
+    def generate_monthly_summary(
+        self,
+        year: int,
+        month: int,
+        synthesizer: Optional[Any] = None,
+    ) -> Optional[MonthlySummary]:
+        """Generate (or regenerate) a monthly summary from weekly episodes.
+
+        Queries all weekly_episodes whose ``week_start`` falls in the given
+        year/month, synthesizes a summary, extracts highlights, and upserts
+        into ``monthly_summaries`` (INSERT OR REPLACE for idempotent
+        re-generation).
+
+        Args:
+            year: Four-digit year (e.g. 2026).
+            month: 1-12 month number.
+            synthesizer: Optional callable ``(episodes: List[Episode]) ->
+                Tuple[str, List[str]]`` that produces (summary_text,
+                highlights).  If *None*, uses deterministic concatenation
+                from episode narratives and key decisions.
+
+        Returns:
+            A :class:`MonthlySummary` if episodes exist for that month,
+            otherwise ``None`` (no-op).
+        """
+        conn = self._get_conn()
+        rows = conn.execute(
+            """SELECT * FROM weekly_episodes
+               WHERE CAST(strftime('%Y', week_start) AS INTEGER) = ?
+                 AND CAST(strftime('%m', week_start) AS INTEGER) = ?
+               ORDER BY week_start ASC""",
+            (year, month),
+        ).fetchall()
+
+        if not rows:
+            logger.info("No episodes for %d-%02d; skipping monthly summary", year, month)
+            return None
+
+        episodes = [self._row_to_episode(r, include_sessions=True) for r in rows]
+
+        if synthesizer is not None:
+            summary_text, highlights = synthesizer(episodes)
+        else:
+            summary_text, highlights = _default_monthly_synthesis(episodes)
+
+        # Upsert (INSERT OR REPLACE handles re-generation)
+        cur = conn.execute(
+            """INSERT OR REPLACE INTO monthly_summaries (year, month, summary, highlights)
+               VALUES (?, ?, ?, ?)""",
+            (year, month, summary_text, json.dumps(highlights)),
+        )
+        conn.commit()
+        assert cur.lastrowid is not None
+        row_id = cur.lastrowid
+        logger.info("Monthly summary for %d-%02d upserted (id=%d)", year, month, row_id)
+
+        return MonthlySummary(
+            id=row_id,
+            year=year,
+            month=month,
+            summary=summary_text,
+            highlights=highlights,
+        )
+
+    def generate_yearly_summary(
+        self,
+        year: int,
+        synthesizer: Optional[Any] = None,
+    ) -> Optional[YearlySummary]:
+        """Generate (or regenerate) a yearly summary from monthly summaries.
+
+        Queries all monthly_summaries for the given year.  If fewer than 2
+        exist, skips (not enough data for a meaningful yearly view).
+
+        Args:
+            year: Four-digit year.
+            synthesizer: Optional callable ``(summaries: List[MonthlySummary]) ->
+                Tuple[str, List[str]]`` for LLM-based synthesis.
+
+        Returns:
+            A :class:`YearlySummary` if enough monthly summaries exist,
+            otherwise ``None``.
+        """
+        conn = self._get_conn()
+        rows = conn.execute(
+            """SELECT * FROM monthly_summaries
+               WHERE year = ?
+               ORDER BY month ASC""",
+            (year,),
+        ).fetchall()
+
+        if len(rows) < 2:
+            logger.info(
+                "Only %d monthly summaries for %d; need >=2 for yearly summary",
+                len(rows), year,
+            )
+            return None
+
+        monthly_summaries = []
+        for r in rows:
+            ms = MonthlySummary(
+                id=r["id"],
+                year=r["year"],
+                month=r["month"],
+                summary=r["summary"],
+                highlights=json.loads(r["highlights"]) if isinstance(r["highlights"], str) else r["highlights"],
+                created_at=r["created_at"],
+            )
+            monthly_summaries.append(ms)
+
+        if synthesizer is not None:
+            summary_text, highlights = synthesizer(monthly_summaries)
+        else:
+            summary_text, highlights = _default_yearly_synthesis(monthly_summaries)
+
+        cur = conn.execute(
+            """INSERT OR REPLACE INTO yearly_summaries (year, summary, highlights)
+               VALUES (?, ?, ?)""",
+            (year, summary_text, json.dumps(highlights)),
+        )
+        conn.commit()
+        assert cur.lastrowid is not None
+        row_id = cur.lastrowid
+        logger.info("Yearly summary for %d upserted (id=%d)", year, row_id)
+
+        return YearlySummary(
+            id=row_id,
+            year=year,
+            summary=summary_text,
+            highlights=highlights,
+        )
+
+    # -- Consolidation hooks (Dream Processor) ------------------------------
+
+    def consolidate_monthly(
+        self,
+        synthesizer: Optional[Any] = None,
+        reference_date: Optional[date] = None,
+    ) -> Optional[MonthlySummary]:
+        """Generate monthly summary for the *previous* month.
+
+        Called on month boundary by the Dream Processor as a
+        post-consolidation step.
+
+        Args:
+            synthesizer: Optional synthesis callable (see
+                :meth:`generate_monthly_summary`).
+            reference_date: Date to compute "previous month" from.
+                Defaults to today.
+
+        Returns:
+            The generated :class:`MonthlySummary`, or ``None`` if no
+            episodes exist for the previous month.
+        """
+        if reference_date is None:
+            reference_date = date.today()
+
+        # Previous month: if current is January, previous is December of prior year
+        if reference_date.month == 1:
+            prev_year, prev_month = reference_date.year - 1, 12
+        else:
+            prev_year, prev_month = reference_date.year, reference_date.month - 1
+
+        logger.info("Consolidating monthly summary for %d-%02d", prev_year, prev_month)
+        return self.generate_monthly_summary(prev_year, prev_month, synthesizer=synthesizer)
+
+    def consolidate_yearly(
+        self,
+        synthesizer: Optional[Any] = None,
+        reference_date: Optional[date] = None,
+    ) -> Optional[YearlySummary]:
+        """Generate yearly summary for the *previous* year.
+
+        Called on year boundary by the Dream Processor as a
+        post-consolidation step.
+
+        Args:
+            synthesizer: Optional synthesis callable (see
+                :meth:`generate_yearly_summary`).
+            reference_date: Date to compute "previous year" from.
+                Defaults to today.
+
+        Returns:
+            The generated :class:`YearlySummary`, or ``None`` if
+            insufficient monthly summaries exist.
+        """
+        if reference_date is None:
+            reference_date = date.today()
+
+        prev_year = reference_date.year - 1
+        logger.info("Consolidating yearly summary for %d", prev_year)
+        return self.generate_yearly_summary(prev_year, synthesizer=synthesizer)
 
     # -- Internal helpers --------------------------------------------------
 
