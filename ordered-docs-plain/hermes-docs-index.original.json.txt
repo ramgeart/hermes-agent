@@ -1,0 +1,494 @@
+{
+  "website": {
+    "tokens": 992600,
+    "docs": {
+      "tokens": 992600,
+      "user-stories.mdx": {"tokens": 0},
+      "user-guide": {
+        "tokens": 761400,
+        "secrets": {
+          "tokens": 1900,
+          "index.md": {"tokens": 200},
+          "bitwarden.md": {"tokens": 1700}
+        },
+        "skills": {
+          "tokens": 454200,
+          "bundled": {
+            "tokens": 223600,
+            "productivity": {
+              "tokens": 18100,
+              "productivity-nano-pdf.md": {"tokens": 400},
+              "productivity-ocr-and-documents.md": {"tokens": 1200},
+              "productivity-maps.md": {"tokens": 1500},
+              "productivity-teams-meeting-pipeline.md": {"tokens": 1500},
+              "productivity-powerpoint.md": {"tokens": 2100},
+              "productivity-airtable.md": {"tokens": 2400},
+              "productivity-google-workspace.md": {"tokens": 2800},
+              "productivity-notion.md": {"tokens": 3100},
+              "productivity-linear.md": {"tokens": 3100}
+            },
+            "apple": {
+              "tokens": 4500,
+              "apple-apple-notes.md": {"tokens": 600},
+              "apple-imessage.md": {"tokens": 700},
+              "apple-apple-reminders.md": {"tokens": 700},
+              "apple-findmy.md": {"tokens": 900},
+              "apple-macos-computer-use.md": {"tokens": 1600}
+            },
+            "software-development": {
+              "tokens": 24500,
+              "software-development-plan.md": {"tokens": 600},
+              "software-development-writing-plans.md": {"tokens": 1700},
+              "software-development-hermes-agent-skill-authoring.md": {"tokens": 1700},
+              "software-development-debugging-hermes-tui-commands.md": {"tokens": 1800},
+              "software-development-requesting-code-review.md": {"tokens": 2000},
+              "software-development-spike.md": {"tokens": 2000},
+              "software-development-test-driven-development.md": {"tokens": 2200},
+              "software-development-systematic-debugging.md": {"tokens": 2300},
+              "software-development-subagent-driven-development.md": {"tokens": 2400},
+              "software-development-node-inspect-debugger.md": {"tokens": 2400},
+              "software-development-hermes-s6-container-supervision.md": {"tokens": 2500},
+              "software-development-python-debugpy.md": {"tokens": 2900}
+            },
+            "media": {
+              "tokens": 5000,
+              "media-songsee.md": {"tokens": 600},
+              "media-gif-search.md": {"tokens": 700},
+              "media-youtube-content.md": {"tokens": 800},
+              "media-spotify.md": {"tokens": 1400},
+              "media-heartmula.md": {"tokens": 1500}
+            },
+            "smart-home": {
+              "tokens": 700,
+              "smart-home-openhue.md": {"tokens": 700}
+            },
+            "research": {
+              "tokens": 29600,
+              "research-polymarket.md": {"tokens": 800},
+              "research-blogwatcher.md": {"tokens": 1200},
+              "research-arxiv.md": {"tokens": 2200},
+              "research-llm-wiki.md": {"tokens": 4200},
+              "research-research-paper-writing.md": {"tokens": 21200}
+            },
+            "note-taking": {
+              "tokens": 800,
+              "note-taking-obsidian.md": {"tokens": 800}
+            },
+            "yuanbao": {
+              "tokens": 900,
+              "yuanbao-yuanbao.md": {"tokens": 900}
+            },
+            "mlops": {
+              "tokens": 23100,
+              "mlops-huggingface-hub.md": {"tokens": 900},
+              "mlops-inference-llama-cpp.md": {"tokens": 2000},
+              "mlops-inference-vllm.md": {"tokens": 2100},
+              "mlops-evaluation-weights-and-biases.md": {"tokens": 2700},
+              "mlops-evaluation-lm-evaluation-harness.md": {"tokens": 2700},
+              "mlops-models-segment-anything.md": {"tokens": 2900},
+              "mlops-research-dspy.md": {"tokens": 3200},
+              "mlops-inference-obliteratus.md": {"tokens": 3300},
+              "mlops-models-audiocraft.md": {"tokens": 3300}
+            },
+            "github": {
+              "tokens": 12800,
+              "github-codebase-inspection.md": {"tokens": 900},
+              "github-github-auth.md": {"tokens": 1700},
+              "github-github-issues.md": {"tokens": 2100},
+              "github-github-pr-workflow.md": {"tokens": 2200},
+              "github-github-code-review.md": {"tokens": 2900},
+              "github-github-repo-management.md": {"tokens": 3000}
+            },
+            "autonomous-ai-agents": {
+              "tokens": 22100,
+              "autonomous-ai-agents-codex.md": {"tokens": 1100},
+              "autonomous-ai-agents-opencode.md": {"tokens": 1700},
+              "autonomous-ai-agents-kanban-codex-lane.md": {"tokens": 2800},
+              "autonomous-ai-agents-claude-code.md": {"tokens": 7100},
+              "autonomous-ai-agents-hermes-agent.md": {"tokens": 9400}
+            },
+            "data-science": {
+              "tokens": 1200,
+              "data-science-jupyter-live-kernel.md": {"tokens": 1200}
+            },
+            "creative": {
+              "tokens": 57200,
+              "creative-architecture-diagram.md": {"tokens": 1400},
+              "creative-creative-ideation.md": {"tokens": 1400},
+              "creative-excalidraw.md": {"tokens": 1600},
+              "creative-design-md.md": {"tokens": 1600},
+              "creative-pixel-art.md": {"tokens": 1600},
+              "creative-popular-web-designs.md": {"tokens": 2100},
+              "creative-sketch.md": {"tokens": 2100},
+              "creative-songwriting-and-ai-music.md": {"tokens": 2200},
+              "creative-baoyu-infographic.md": {"tokens": 2200},
+              "creative-ascii-art.md": {"tokens": 2300},
+              "creative-baoyu-article-illustrator.md": {"tokens": 2400},
+              "creative-manim-video.md": {"tokens": 2600},
+              "creative-pretext.md": {"tokens": 3100},
+              "creative-ascii-video.md": {"tokens": 3100},
+              "creative-baoyu-comic.md": {"tokens": 3200},
+              "creative-touchdesigner-mcp.md": {"tokens": 3300},
+              "creative-claude-design.md": {"tokens": 4200},
+              "creative-comfyui.md": {"tokens": 4900},
+              "creative-p5js.md": {"tokens": 5700},
+              "creative-humanizer.md": {"tokens": 6200}
+            },
+            "dogfood": {
+              "tokens": 1400,
+              "dogfood-dogfood.md": {"tokens": 1400}
+            },
+            "gaming": {
+              "tokens": 3400,
+              "gaming-minecraft-modpack-server.md": {"tokens": 1500},
+              "gaming-pokemon-player.md": {"tokens": 1900}
+            },
+            "email": {
+              "tokens": 1500,
+              "email-himalaya.md": {"tokens": 1500}
+            },
+            "devops": {
+              "tokens": 6800,
+              "devops-webhook-subscriptions.md": {"tokens": 1500},
+              "devops-kanban-worker.md": {"tokens": 2300},
+              "devops-kanban-orchestrator.md": {"tokens": 3000}
+            },
+            "mcp": {
+              "tokens": 2700,
+              "mcp-native-mcp.md": {"tokens": 2700}
+            },
+            "social-media": {
+              "tokens": 3100,
+              "social-media-xurl.md": {"tokens": 3100}
+            },
+            "red-teaming": {
+              "tokens": 4200,
+              "red-teaming-godmode.md": {"tokens": 4200}
+            }
+          },
+          "optional": {
+            "tokens": 226500,
+            "mlops": {
+              "tokens": 91100,
+              "mlops-training-unsloth.md": {"tokens": 600},
+              "mlops-training-axolotl.md": {"tokens": 1200},
+              "mlops-faiss.md": {"tokens": 1200},
+              "mlops-tensorrt-llm.md": {"tokens": 1300},
+              "mlops-simpo.md": {"tokens": 1400},
+              "mlops-clip.md": {"tokens": 1600},
+              "mlops-whisper.md": {"tokens": 1700},
+              "mlops-llava.md": {"tokens": 1800},
+              "mlops-pinecone.md": {"tokens": 1800},
+              "mlops-accelerate.md": {"tokens": 1900},
+              "mlops-modal.md": {"tokens": 1900},
+              "mlops-chroma.md": {"tokens": 2000},
+              "mlops-torchtitan.md": {"tokens": 2100},
+              "mlops-pytorch-lightning.md": {"tokens": 2100},
+              "mlops-nemo-curator.md": {"tokens": 2100},
+              "mlops-flash-attention.md": {"tokens": 2200},
+              "mlops-slime.md": {"tokens": 2400},
+              "mlops-lambda-labs.md": {"tokens": 2700},
+              "mlops-peft.md": {"tokens": 2700},
+              "mlops-training-trl-fine-tuning.md": {"tokens": 2800},
+              "mlops-saelens.md": {"tokens": 2800},
+              "mlops-stable-diffusion.md": {"tokens": 2800},
+              "mlops-qdrant.md": {"tokens": 2900},
+              "mlops-huggingface-tokenizers.md": {"tokens": 3000},
+              "mlops-guidance.md": {"tokens": 3100},
+              "mlops-inference-outlines.md": {"tokens": 3300},
+              "mlops-instructor.md": {"tokens": 3600},
+              "mlops-pytorch-fsdp.md": {"tokens": 32100}
+            },
+            "finance": {
+              "tokens": 30200,
+              "finance-stocks.md": {"tokens": 800},
+              "finance-merger-model.md": {"tokens": 1300},
+              "finance-pptx-author.md": {"tokens": 1500},
+              "finance-excel-author.md": {"tokens": 2100},
+              "finance-lbo-model.md": {"tokens": 3600},
+              "finance-3-statement-model.md": {"tokens": 4600},
+              "finance-comps-analysis.md": {"tokens": 6200},
+              "finance-dcf-model.md": {"tokens": 10100}
+            },
+            "mcp": {
+              "tokens": 2700,
+              "mcp-mcporter.md": {"tokens": 800},
+              "mcp-fastmcp.md": {"tokens": 1900}
+            },
+            "productivity": {
+              "tokens": 16400,
+              "productivity-canvas.md": {"tokens": 800},
+              "productivity-here-now.md": {"tokens": 1900},
+              "productivity-siyuan.md": {"tokens": 2000},
+              "productivity-telephony.md": {"tokens": 2800},
+              "productivity-memento-flashcards.md": {"tokens": 2800},
+              "productivity-shop-app.md": {"tokens": 3000},
+              "productivity-shopify.md": {"tokens": 3100}
+            },
+            "email": {
+              "tokens": 1000,
+              "email-agentmail.md": {"tokens": 1000}
+            },
+            "creative": {
+              "tokens": 12000,
+              "creative-blender-mcp.md": {"tokens": 1000},
+              "creative-meme-generation.md": {"tokens": 1300},
+              "creative-kanban-video-orchestrator.md": {"tokens": 2700},
+              "creative-hyperframes.md": {"tokens": 3300},
+              "creative-concept-diagrams.md": {"tokens": 3700}
+            },
+            "security": {
+              "tokens": 9600,
+              "security-1password.md": {"tokens": 1000},
+              "security-sherlock.md": {"tokens": 1400},
+              "security-web-pentest.md": {"tokens": 2800},
+              "security-oss-forensics.md": {"tokens": 4400}
+            },
+            "devops": {
+              "tokens": 7400,
+              "devops-watchers.md": {"tokens": 1100},
+              "devops-cli.md": {"tokens": 1100},
+              "devops-docker-management.md": {"tokens": 2300},
+              "devops-pinggy-tunnel.md": {"tokens": 2900}
+            },
+            "research": {
+              "tokens": 23000,
+              "research-domain-intel.md": {"tokens": 1100},
+              "research-gitnexus-explorer.md": {"tokens": 1700},
+              "research-searxng-search.md": {"tokens": 1700},
+              "research-duckduckgo-search.md": {"tokens": 1900},
+              "research-darwinian-evolver.md": {"tokens": 1900},
+              "research-scrapling.md": {"tokens": 2000},
+              "research-drug-discovery.md": {"tokens": 2000},
+              "research-parallel-cli.md": {"tokens": 2400},
+              "research-osint-investigation.md": {"tokens": 2600},
+              "research-qmd.md": {"tokens": 2800},
+              "research-bioinformatics.md": {"tokens": 2900}
+            },
+            "communication": {
+              "tokens": 1200,
+              "communication-one-three-one-rule.md": {"tokens": 1200}
+            },
+            "autonomous-ai-agents": {
+              "tokens": 7300,
+              "autonomous-ai-agents-blackbox.md": {"tokens": 1300},
+              "autonomous-ai-agents-openhands.md": {"tokens": 1900},
+              "autonomous-ai-agents-honcho.md": {"tokens": 4100}
+            },
+            "blockchain": {
+              "tokens": 5000,
+              "blockchain-solana.md": {"tokens": 1500},
+              "blockchain-hyperliquid.md": {"tokens": 1600},
+              "blockchain-evm.md": {"tokens": 1900}
+            },
+            "web-development": {
+              "tokens": 2000,
+              "web-development-page-agent.md": {"tokens": 2000}
+            },
+            "dogfood": {
+              "tokens": 2000,
+              "dogfood-adversarial-ux-test.md": {"tokens": 2000}
+            },
+            "health": {
+              "tokens": 5600,
+              "health-fitness-nutrition.md": {"tokens": 2100},
+              "health-neuroskill-bci.md": {"tokens": 3500}
+            },
+            "software-development": {
+              "tokens": 6600,
+              "software-development-code-wiki.md": {"tokens": 3300},
+              "software-development-rest-graphql-debug.md": {"tokens": 3300}
+            },
+            "migration": {
+              "tokens": 3400,
+              "migration-openclaw-migration.md": {"tokens": 3400}
+            }
+          },
+          "google-workspace.md": {"tokens": 1300},
+          "godmode.md": {"tokens": 2800}
+        },
+        "messaging": {
+          "tokens": 86400,
+          "simplex.md": {"tokens": 700},
+          "qqbot.md": {"tokens": 1000},
+          "bluebubbles.md": {"tokens": 1100},
+          "sms.md": {"tokens": 1300},
+          "wecom-callback.md": {"tokens": 1400},
+          "ntfy.md": {"tokens": 1500},
+          "teams-meetings.md": {"tokens": 1600},
+          "email.md": {"tokens": 1700},
+          "msgraph-webhook.md": {"tokens": 1700},
+          "line.md": {"tokens": 1800},
+          "teams.md": {"tokens": 1900},
+          "homeassistant.md": {"tokens": 2000},
+          "signal.md": {"tokens": 2100},
+          "whatsapp.md": {"tokens": 2100},
+          "yuanbao.md": {"tokens": 2200},
+          "dingtalk.md": {"tokens": 2400},
+          "wecom.md": {"tokens": 2500},
+          "mattermost.md": {"tokens": 2800},
+          "open-webui.md": {"tokens": 2800},
+          "weixin.md": {"tokens": 3300},
+          "webhooks.md": {"tokens": 4100},
+          "slack.md": {"tokens": 4900},
+          "feishu.md": {"tokens": 5000},
+          "index.md": {"tokens": 5300},
+          "matrix.md": {"tokens": 5500},
+          "discord.md": {"tokens": 8700},
+          "telegram.md": {"tokens": 12200}
+        },
+        "features": {
+          "tokens": 155200,
+          "provider-routing.md": {"tokens": 1100},
+          "context-references.md": {"tokens": 1100},
+          "deliverable-mode.md": {"tokens": 1200},
+          "subscription-proxy.md": {"tokens": 1300},
+          "overview.md": {"tokens": 1500},
+          "image-generation.md": {"tokens": 1500},
+          "computer-use.md": {"tokens": 1600},
+          "x-search.md": {"tokens": 1600},
+          "tools.md": {"tokens": 1600},
+          "personality.md": {"tokens": 1700},
+          "tool-gateway.md": {"tokens": 1700},
+          "acp.md": {"tokens": 1900},
+          "batch-processing.md": {"tokens": 1900},
+          "context-files.md": {"tokens": 1900},
+          "credential-pools.md": {"tokens": 2000},
+          "lsp.md": {"tokens": 2000},
+          "memory.md": {"tokens": 2000},
+          "code-execution.md": {"tokens": 2100},
+          "goals.md": {"tokens": 2100},
+          "kanban-worker-lanes.md": {"tokens": 2100},
+          "vision.md": {"tokens": 2200},
+          "skins.md": {"tokens": 2300},
+          "curator.md": {"tokens": 2700},
+          "honcho.md": {"tokens": 2800},
+          "spotify.md": {"tokens": 2900},
+          "delegation.md": {"tokens": 3000},
+          "web-search.md": {"tokens": 3100},
+          "fallback-providers.md": {"tokens": 3700},
+          "built-in-plugins.md": {"tokens": 3700},
+          "kanban-tutorial.md": {"tokens": 3900},
+          "voice-mode.md": {"tokens": 4000},
+          "api-server.md": {"tokens": 4000},
+          "memory-providers.md": {"tokens": 4700},
+          "plugins.md": {"tokens": 4800},
+          "mcp.md": {"tokens": 5000},
+          "web-dashboard.md": {"tokens": 5300},
+          "cron.md": {"tokens": 5600},
+          "codex-app-server-runtime.md": {"tokens": 5900},
+          "browser.md": {"tokens": 6000},
+          "tts.md": {"tokens": 6600},
+          "skills.md": {"tokens": 6900},
+          "extending-the-dashboard.md": {"tokens": 8000},
+          "hooks.md": {"tokens": 10800},
+          "kanban.md": {"tokens": 13400}
+        },
+        "git-worktrees.md": {"tokens": 1100},
+        "checkpoints-and-rollback.md": {"tokens": 2000},
+        "profiles.md": {"tokens": 2200},
+        "configuring-models.md": {"tokens": 2600},
+        "tui.md": {"tokens": 3300},
+        "windows-wsl-quickstart.md": {"tokens": 3800},
+        "cli.md": {"tokens": 3800},
+        "profile-distributions.md": {"tokens": 4400},
+        "sessions.md": {"tokens": 4700},
+        "windows-native.md": {"tokens": 4800},
+        "docker.md": {"tokens": 6200},
+        "security.md": {"tokens": 6500},
+        "configuration.md": {"tokens": 18300}
+      },
+      "reference": {
+        "tokens": 59300,
+        "model-catalog.md": {"tokens": 800},
+        "mcp-config-reference.md": {"tokens": 1600},
+        "toolsets-reference.md": {"tokens": 2100},
+        "profile-commands.md": {"tokens": 3300},
+        "skills-catalog.md": {"tokens": 4000},
+        "tools-reference.md": {"tokens": 4600},
+        "slash-commands.md": {"tokens": 4900},
+        "optional-skills-catalog.md": {"tokens": 5100},
+        "faq.md": {"tokens": 6600},
+        "environment-variables.md": {"tokens": 12500},
+        "cli-commands.md": {"tokens": 13800}
+      },
+      "developer-guide": {
+        "tokens": 60300,
+        "acp-internals.md": {"tokens": 1100},
+        "adding-tools.md": {"tokens": 1400},
+        "programmatic-integration.md": {"tokens": 1400},
+        "context-engine-plugin.md": {"tokens": 1500},
+        "extending-the-cli.md": {"tokens": 1500},
+        "trajectory-format.md": {"tokens": 1700},
+        "provider-runtime.md": {"tokens": 1800},
+        "contributing.md": {"tokens": 1800},
+        "video-gen-provider-plugin.md": {"tokens": 1800},
+        "browser-supervisor.md": {"tokens": 1900},
+        "memory-provider-plugin.md": {"tokens": 1900},
+        "cron-internals.md": {"tokens": 1900},
+        "tools-runtime.md": {"tokens": 2000},
+        "agent-loop.md": {"tokens": 2100},
+        "prompt-assembly.md": {"tokens": 2200},
+        "image-gen-provider-plugin.md": {"tokens": 2300},
+        "web-search-provider-plugin.md": {"tokens": 2300},
+        "gateway-internals.md": {"tokens": 2500},
+        "session-storage.md": {"tokens": 2500},
+        "model-provider-plugin.md": {"tokens": 2800},
+        "context-compression-and-caching.md": {"tokens": 2800},
+        "architecture.md": {"tokens": 2900},
+        "creating-skills.md": {"tokens": 3200},
+        "adding-providers.md": {"tokens": 3300},
+        "plugin-llm-access.md": {"tokens": 3700},
+        "adding-platform-adapters.md": {"tokens": 6000}
+      },
+      "guides": {
+        "tokens": 72400,
+        "aws-bedrock.md": {"tokens": 1200},
+        "use-soul-with-hermes.md": {"tokens": 1400},
+        "minimax-oauth.md": {"tokens": 1600},
+        "pipe-script-output.md": {"tokens": 1700},
+        "operate-teams-meeting-pipeline.md": {"tokens": 1700},
+        "microsoft-graph-app-registration.md": {"tokens": 1700},
+        "work-with-skills.md": {"tokens": 1800},
+        "github-pr-review-agent.md": {"tokens": 1800},
+        "cron-troubleshooting.md": {"tokens": 1900},
+        "local-llm-on-mac.md": {"tokens": 1900},
+        "use-voice-mode-with-hermes.md": {"tokens": 2000},
+        "oauth-over-ssh.md": {"tokens": 2100},
+        "python-library.md": {"tokens": 2100},
+        "automate-with-cron.md": {"tokens": 2100},
+        "local-ollama-setup.md": {"tokens": 2100},
+        "daily-briefing-bot.md": {"tokens": 2100},
+        "cron-script-only.md": {"tokens": 2200},
+        "google-gemini.md": {"tokens": 2200},
+        "run-hermes-with-nous-portal.md": {"tokens": 2300},
+        "delegation-patterns.md": {"tokens": 2300},
+        "use-mcp-with-hermes.md": {"tokens": 2500},
+        "tips.md": {"tokens": 2500},
+        "xai-grok-oauth.md": {"tokens": 2600},
+        "team-telegram-assistant.md": {"tokens": 2700},
+        "webhook-github-pr-review.md": {"tokens": 3100},
+        "migrate-from-openclaw.md": {"tokens": 3200},
+        "automation-templates.md": {"tokens": 3900},
+        "azure-foundry.md": {"tokens": 4300},
+        "build-a-hermes-plugin.md": {"tokens": 9400}
+      },
+      "getting-started": {
+        "tokens": 19100,
+        "termux.md": {"tokens": 1400},
+        "learning-path.md": {"tokens": 1700},
+        "updating.md": {"tokens": 2100},
+        "installation.md": {"tokens": 2500},
+        "quickstart.md": {"tokens": 3200},
+        "nix-setup.md": {"tokens": 8200}
+      },
+      "index.mdx": {"tokens": 1400},
+      "integrations": {
+        "tokens": 18600,
+        "index.md": {"tokens": 1600},
+        "nous-portal.md": {"tokens": 2700},
+        "providers.md": {"tokens": 14300}
+      }
+    }
+  }
+}
