@@ -45,10 +45,9 @@ done
 # -------------------------------------------------------------------------
 # 4. ydotool daemon (input simulation for Wayland)
 # -------------------------------------------------------------------------
-echo "[hermes-neo] Starting ydotoold..."
-ydotoold &
-YDOTOOL_PID=$!
-sleep 1
+# ydotool not installed in this image — skip for now
+echo "[hermes-neo] ydotoold: skipped (not installed)"
+
 
 # -------------------------------------------------------------------------
 # 5. Tailscale (connect to tailnet)
@@ -82,7 +81,7 @@ computer-use-linux doctor 2>/dev/null | jq -r '.readiness.summary' 2>/dev/null |
 echo "[hermes-neo] Starting Camofox Browser..."
 mkdir -p /opt/data/browser/camofox-profile
 # Start Camofox as a REST API server
-camofox-browser start     --port 9377     --profile /opt/data/browser/camofox-profile     --headless     2>&1 &
+camofox server start --port 9377 &
 CAMOFOX_PID=$!
 sleep 3
 echo "[hermes-neo] Camofox Browser API: http://localhost:9377"

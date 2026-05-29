@@ -27,13 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dbus dbus-x11 \
     # Wayland / GNOME desktop (computer-use-linux requirements)
     gnome-shell gnome-session mutter \
-    gnome-shell-extension-manager \
-    at-spi2-core at-spi2-common \
+    at-spi2-core at-spi2-common libatspi2.0-0 \
     xdg-utils xdg-desktop-portal xdg-desktop-portal-gtk \
-    # Input simulation (ydotool for Wayland)
-    ydotool \
-    # Screenshot tools
-    grim slurp \
+    # Accessibility (AT-SPI)
+    libglib2.0-bin \
     # Misc
     xz-utils unzip jq \
     && rm -rf /var/lib/apt/lists/*
@@ -140,7 +137,7 @@ VOLUME ["/opt/data"]
 # -------------------------------------------------------------------------
 COPY --chmod=0755 develop/startup.sh /opt/hermes-neo/startup.sh
 
-EXPOSE 9377  # Camofox Browser API (internal)
+EXPOSE 9377
 
 ENTRYPOINT ["/opt/hermes-neo/startup.sh"]
-CMD ["hermes", "gateway", "start"]
+CMD ["hermes", "gateway", "run"]
