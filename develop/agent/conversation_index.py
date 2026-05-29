@@ -1,17 +1,19 @@
-"""ConversationIndex — conversation metadata and FTS5 search for memory.db.
+"""ConversationIndex — conversation metadata and FTS5 search in state.db.
 
 Manages the conversation_index table: lightweight per-session metadata
 (title, summary, topics, mood, importance) with FTS5 full-text search
-for recall.  Separate from state.db and identity.db.
+for recall.  Lives in state.db with a foreign key to sessions.id for
+referential integrity.
 
 Schema:
-    memory.db -> conversation_index table + conversation_index_fts (FTS5)
+    state.db -> conversation_index table + conversation_index_fts (FTS5)
     + auto-sync triggers (INSERT/DELETE/UPDATE) + temporal indexes
+    + FOREIGN KEY (session_id) REFERENCES sessions(id)
 
 Usage:
     from agent.conversation_index import ConversationIndex
 
-    ci = ConversationIndex(db_path="/opt/data/memory.db")
+    ci = ConversationIndex(db_path="/opt/data/state.db")
     ci.initialize()
     ci.insert_conversation(
         session_id="sess-001",
@@ -53,7 +55,8 @@ CREATE TABLE IF NOT EXISTS conversation_index (
     importance      INTEGER NOT NULL DEFAULT 5 CHECK (importance BETWEEN 1 AND 10),
     mood            TEXT    NOT NULL DEFAULT 'neutral',
     created_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
-    updated_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+    updated_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_conversation_index_date
@@ -337,6 +340,81 @@ class ConversationIndex:
             logger.warning("No conversation found with id=%d for deletion", index_id)
         return deleted
 
+    # -- Upsert from session/dream data ------------------------------------
+
+    def upsert_conversation(
+        self,
+        session_id: str,
+        title: str = "",
+        summary: str = "",
+        topics: str = "",
+        day_number: int = 0,
+        date: str = "",
+        importance: int = 5,
+        mood: str = "neutral",
+    ) -> int:
+        """Insert or update a conversation index entry.
+
+        Uses INSERT ... ON CONFLICT(session_id) DO UPDATE so callers don't
+        need to check whether the row already exists.
+
+        Returns the row id (new or existing).
+        Raises ValueError on validation failure.
+        """
+        if not session_id or not session_id.strip():
+            raise ValueError("session_id cannot be empty")
+        if importance < 1 or importance > 10:
+            raise ValueError(f"importance must be 1-10, got {importance}")
+        if mood and mood not in VALID_MOODS:
+            logger.warning("Non-standard mood '%s' — inserting anyway", mood)
+        if not date:
+            date = datetime.now(UTC).strftime("%Y-%m-%d")
+
+        conn = self._get_conn()
+        cursor = conn.execute(
+            """INSERT INTO conversation_index
+               (session_id, title, summary, topics, day_number, date, importance, mood)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(session_id) DO UPDATE SET
+                   title = excluded.title,
+                   summary = excluded.summary,
+                   topics = excluded.topics,
+                   day_number = excluded.day_number,
+                   date = excluded.date,
+                   importance = excluded.importance,
+                   mood = excluded.mood,
+                   updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now')""",
+            (session_id, title, summary, topics, day_number, date, importance, mood),
+        )
+        conn.commit()
+        row_id: int = cursor.lastrowid or 0
+        logger.info(
+            "Upserted conversation index id=%d session=%s title='%s'",
+            row_id, session_id, title[:50],
+        )
+        return row_id
+
+    # -- Orphan cleanup ---------------------------------------------------
+
+    def cleanup_orphans(self) -> int:
+        """Remove conversation_index rows whose session_id has no matching
+        session in the sessions table.
+
+        Only works when both tables live in the same database (state.db).
+
+        Returns the number of orphan rows deleted.
+        """
+        conn = self._get_conn()
+        cursor = conn.execute(
+            """DELETE FROM conversation_index
+               WHERE session_id NOT IN (SELECT id FROM sessions)"""
+        )
+        conn.commit()
+        deleted = cursor.rowcount
+        if deleted:
+            logger.info("Cleaned up %d orphan conversation_index rows", deleted)
+        return deleted
+
     # -- Count ------------------------------------------------------------
 
     def count(self) -> int:
@@ -352,12 +430,15 @@ _default_index: Optional[ConversationIndex] = None
 
 
 def get_conversation_index(db_path: str | Path | None = None) -> ConversationIndex:
-    """Get or create the singleton ConversationIndex."""
+    """Get or create the singleton ConversationIndex.
+
+    Defaults to state.db so conversation_index has FK to sessions.
+    """
     global _default_index
     if _default_index is None:
         if db_path is None:
             from hermes_constants import get_hermes_home
-            db_path = Path(get_hermes_home()) / "memory.db"
+            db_path = Path(get_hermes_home()) / "state.db"
         _default_index = ConversationIndex(db_path)
         _default_index.initialize()
     return _default_index
