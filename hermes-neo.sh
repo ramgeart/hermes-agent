@@ -41,6 +41,11 @@ case "$1" in
         echo "=== Hermes ==="
         docker exec -i${T} "$CONTAINER" hermes version 2>/dev/null || echo "(not running)"
         ;;
+    identity)
+        ensure_running
+        shift
+        exec docker exec -i${T} "$CONTAINER" python3 /opt/hermes-neo/identity_cli.py "$@"
+        ;;
     chat|model|fallback|secrets|migrate|gateway|proxy|lsp|setup|kanban|hooks|doctor|security|dump|debug|backup|checkpoints|import|config|pairing|skills|bundles|plugins|curator|memory|tools|computer-use|mcp|sessions|insights|claw|version|update|uninstall|acp|profile|completion|dashboard|cron|webhook|portal|auth|send|login|logout)
         ensure_running
         exec docker exec -i${T} "$CONTAINER" hermes "$@"
