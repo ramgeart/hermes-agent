@@ -1,0 +1,174 @@
+# =============================================================================
+# hermes-neo Agent Stack
+# docker compose up -d
+# =============================================================================
+
+x-tailscale: &tailscale-defaults
+  cap_add:
+    - NET_ADMIN
+    - SYS_MODULE
+  devices:
+    - /dev/net/tun:/dev/net/tun
+  volumes:
+    - tailscale-state:/var/lib/tailscale
+
+services:
+  # =========================================================================
+  # HERMES AGENT — Main container
+  # =========================================================================
+  hermes-agent:
+    build:
+      context: ../
+      dockerfile: develop/Dockerfile
+    container_name: hermes-neo-agent
+    hostname: ${TS_HOSTNAME:-hermes-neo-agent}
+    volumes:
+      # Persistence (survives container restarts)
+      - ./TestAgent/.hermes:/opt/data
+      # Browser profile (Proton suite, cookies, etc.)
+      - ./TestAgent/browser/camofox-profile:/opt/data/browser/camofox-profile
+      # Agent working directory
+      - ./TestAgent/workspace:/opt/data/workspace
+    env_file: .env
+    environment:
+      - HERMES_HOME=/opt/data
+      - XDG_RUNTIME_DIR=/tmp/xdg-runtime
+      - WAYLAND_DISPLAY=wayland-0
+      - DISPLAY=:99
+      # Service discovery (internal network)
+      - FIRECRAWL_API_URL=http://firecrawl:3002
+      - SEARXNG_URL=http://searxng:8080
+    <<: *tailscale-defaults
+    # Required for GNOME/Wayland (mutter needs /dev/shm and tmpfs)
+    shm_size: '2gb'
+    tmpfs:
+      - /tmp:size=1G
+    restart: unless-stopped
+    networks:
+      - hermes-net
+    depends_on:
+      firecrawl:
+        condition: service_started
+      searxng:
+        condition: service_started
+
+  # =========================================================================
+  # FIRECRAWL — Web scraping engine (shared)
+  # =========================================================================
+  firecrawl:
+    build:
+      context: ../../../firecrawl/apps/api
+    container_name: hermes-firecrawl
+    environment:
+      - PORT=3002
+      - HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+      - PLAYWRIGHT_MICROSERVICE_URL=http://playwright-service:3000/scrape
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=firecrawl
+      - POSTGRES_HOST=nuq-postgres
+      - POSTGRES_PORT=5432
+      - USE_DB_AUTHENTICATION=false
+      - NUM_WORKERS_PER_QUEUE=8
+      - CRAWL_CONCURRENT_REQUESTS=10
+      - MAX_CONCURRENT_JOBS=5
+      - BROWSER_POOL_SIZE=5
+      - BULL_AUTH_KEY=${BULL_AUTH_KEY:-hermes-bull-key}
+    volumes:
+      - firecrawl-npm-cache:/app/node_modules/.cache
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    restart: unless-stopped
+    networks:
+      - hermes-net
+    depends_on:
+      redis:
+        condition: service_started
+      nuq-postgres:
+        condition: service_healthy
+      playwright-service:
+        condition: service_started
+
+  playwright-service:
+    build:
+      context: ../../../firecrawl/apps/playwright-service-ts
+    container_name: hermes-playwright
+    environment:
+      - PORT=3000
+      - MAX_CONCURRENT_PAGES=10
+    cpus: 2.0
+    mem_limit: 4G
+    restart: unless-stopped
+    networks:
+      - hermes-net
+
+  # =========================================================================
+  # SEARXNG — Private web search
+  # =========================================================================
+  searxng:
+    image: searxng/searxng:latest
+    container_name: hermes-searxng
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./searxng:/etc/searxng:ro
+    restart: unless-stopped
+    networks:
+      - hermes-net
+
+  # =========================================================================
+  # REDIS — Cache + queue (shared by firecrawl)
+  # =========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: hermes-redis
+    restart: unless-stopped
+    networks:
+      - hermes-net
+
+  # =========================================================================
+  # POSTGRESQL — Firecrawl DB
+  # =========================================================================
+  nuq-postgres:
+    image: postgres:16-alpine
+    container_name: hermes-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=firecrawl
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hermes-net
+
+  # =========================================================================
+  # PROTONMAIL BRIDGE — Email (prepared, not activated)
+  # =========================================================================
+  # Uncomment when F7 (Proton Integration) is executed
+  # protonmail-bridge:
+  #   image: shenxn/protonmail-bridge:latest
+  #   container_name: hermes-proton-bridge
+  #   volumes:
+  #     - protonmail-data:/root/protonmail-bridge
+  #   restart: unless-stopped
+  #   networks:
+  #     - hermes-net
+
+volumes:
+  tailscale-state:
+  firecrawl-npm-cache:
+  postgres-data:
+  # protonmail-data:
+
+networks:
+  hermes-net:
+    driver: bridge

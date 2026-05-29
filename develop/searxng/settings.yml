@@ -1,0 +1,24 @@
+use_default_settings: true
+general:
+  instance_name: "hermes-neo search"
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  secret_key: "hermes-neo-change-me-in-production"
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "es"
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+  - name: github
+    engine: github
+    shortcut: gh
